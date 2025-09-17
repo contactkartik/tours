@@ -1,5 +1,6 @@
 import { useState } from 'react'
-import { useMutation, queryClient } from '@tanstack/react-query'
+import { useMutation } from '@tanstack/react-query'
+import { queryClient } from '@/lib/queryClient'
 import { apiRequest } from '@/lib/queryClient'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'

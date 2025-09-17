@@ -57,6 +57,7 @@ export const insertExperienceSchema = createInsertSchema(experiences).omit({
 export const insertBookingSchema = createInsertSchema(bookings).omit({
   id: true,
   createdAt: true,
+  totalAmount: true, // This will be calculated on the server
 }).extend({
   bookingDate: z.string().transform((str) => new Date(str)),
 });
