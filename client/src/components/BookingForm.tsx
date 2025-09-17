@@ -1,4 +1,6 @@
 import { useState } from 'react'
+import { useMutation, queryClient } from '@tanstack/react-query'
+import { apiRequest } from '@/lib/queryClient'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -13,11 +15,13 @@ import { format } from 'date-fns'
 interface BookingFormProps {
   experienceTitle?: string
   price?: number
+  experienceId?: string
 }
 
 export default function BookingForm({ 
   experienceTitle = "Amazing Rajasthan Desert Safari",
-  price = 2499 
+  price = 2499,
+  experienceId = ""
 }: BookingFormProps) {
   const [step, setStep] = useState(1)
   const [formData, setFormData] = useState({
@@ -53,10 +57,43 @@ export default function BookingForm({
     setStep(prev => prev - 1)
   }
 
+  const bookingMutation = useMutation({
+    mutationFn: async (bookingData: any) => {
+      const response = await apiRequest('/api/bookings', {
+        method: 'POST',
+        body: JSON.stringify(bookingData),
+        headers: { 'Content-Type': 'application/json' }
+      });
+      return response;
+    },
+    onSuccess: () => {
+      setStep(4); // Success step
+      queryClient.invalidateQueries({ queryKey: ['/api/bookings'] });
+    },
+    onError: (error: any) => {
+      console.error('Booking failed:', error);
+      // You can show error to user here
+    }
+  });
+
   const handleSubmit = () => {
-    console.log('Booking submitted:', { experienceTitle, price, ...formData })
-    setStep(4) // Success step
-    // TODO: Remove mock functionality - implement real booking submission
+    if (!formData.date || !experienceId) {
+      console.error('Missing required fields');
+      return;
+    }
+
+    const bookingData = {
+      experienceId,
+      customerName: `${formData.firstName} ${formData.lastName}`,
+      customerEmail: formData.email,
+      customerPhone: formData.phone,
+      bookingDate: formData.date.toISOString(),
+      guests: parseInt(formData.guests),
+      specialRequests: formData.specialRequests || null,
+      status: 'pending'
+    };
+
+    bookingMutation.mutate(bookingData);
   }
 
   const totalPrice = price * parseInt(formData.guests || '1')
@@ -333,10 +370,12 @@ export default function BookingForm({
               ) : (
                 <Button
                   onClick={handleSubmit}
-                  disabled={!formData.paymentMethod || !formData.acceptTerms}
+                  disabled={!formData.paymentMethod || !formData.acceptTerms || bookingMutation.isPending}
                   data-testid="button-submit-booking"
                 >
-                  Complete Booking - ₹{totalPrice.toLocaleString()}
+                  {bookingMutation.isPending 
+                    ? 'Processing Booking...' 
+                    : `Complete Booking - ₹${totalPrice.toLocaleString()}`}
                 </Button>
               )}
             </div>

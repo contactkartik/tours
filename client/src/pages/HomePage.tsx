@@ -1,96 +1,50 @@
 import { useState } from 'react'
+import { useQuery } from '@tanstack/react-query'
 import Header from '@/components/Header'
 import HeroSection from '@/components/HeroSection'
 import ExperienceCard from '@/components/ExperienceCard'
 import BookingForm from '@/components/BookingForm'
 import Footer from '@/components/Footer'
 import { Button } from '@/components/ui/button'
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { Skeleton } from '@/components/ui/skeleton'
+import type { Experience } from '@shared/schema'
 
-// TODO: Remove mock data when implementing real functionality
-const mockExperiences = [
-  {
-    id: "1",
-    title: "Amazing Rajasthan Desert Safari",
-    location: "Jaisalmer, Rajasthan",
-    price: 2499,
-    originalPrice: 3499,
-    rating: 4.8,
-    reviewCount: 127,
-    duration: "3 Days",
-    groupSize: "2-8 People",
-    category: "Adventure",
-    image: "https://images.unsplash.com/photo-1544735716-392fe2489ffa?w=400&h=300&fit=crop",
-    featured: true
-  },
-  {
-    id: "2", 
-    title: "Kerala Backwater Cruise",
-    location: "Alleppey, Kerala",
-    price: 1899,
-    rating: 4.7,
-    reviewCount: 89,
-    duration: "2 Days",
-    groupSize: "2-6 People", 
-    category: "Cultural",
-    image: "https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=400&h=300&fit=crop"
-  },
-  {
-    id: "3",
-    title: "Himalayan Trek Experience", 
-    location: "Manali, Himachal Pradesh",
-    price: 3299,
-    originalPrice: 3999,
-    rating: 4.9,
-    reviewCount: 156,
-    duration: "5 Days",
-    groupSize: "4-12 People",
-    category: "Adventure", 
-    image: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400&h=300&fit=crop"
-  },
-  {
-    id: "4",
-    title: "Goa Beach Paradise",
-    location: "North Goa, Goa", 
-    price: 1299,
-    rating: 4.5,
-    reviewCount: 203,
-    duration: "1 Day",
-    groupSize: "1-10 People",
-    category: "Beach",
-    image: "https://images.unsplash.com/photo-1559827260-dc66d52bef19?w=400&h=300&fit=crop"
-  },
-  {
-    id: "5",
-    title: "Tamil Nadu Temple Tour",
-    location: "Madurai, Tamil Nadu",
-    price: 1799,
-    rating: 4.6, 
-    reviewCount: 94,
-    duration: "2 Days",
-    groupSize: "3-15 People",
-    category: "Cultural",
-    image: "https://images.unsplash.com/photo-1568849676085-51415703900f?w=400&h=300&fit=crop"
-  },
-  {
-    id: "6",
-    title: "Mumbai Street Food Tour",
-    location: "Mumbai, Maharashtra",
-    price: 599,
-    rating: 4.4,
-    reviewCount: 178,
-    duration: "4 Hours", 
-    groupSize: "2-8 People",
-    category: "Food",
-    image: "https://images.unsplash.com/photo-1606491956689-2ea866880c84?w=400&h=300&fit=crop"
-  }
-]
+function ExperienceCardSkeleton() {
+  return (
+    <div className="bg-card border rounded-xl overflow-hidden shadow-lg hover-elevate">
+      <Skeleton className="w-full h-64" />
+      <div className="p-6">
+        <Skeleton className="h-6 w-3/4 mb-2" />
+        <Skeleton className="h-4 w-1/2 mb-4" />
+        <div className="flex items-center justify-between mb-4">
+          <Skeleton className="h-6 w-20" />
+          <Skeleton className="h-4 w-16" />
+        </div>
+        <div className="flex items-center justify-between">
+          <Skeleton className="h-4 w-24" />
+          <Skeleton className="h-9 w-24" />
+        </div>
+      </div>
+    </div>
+  )
+}
 
 export default function HomePage() {
-  const [selectedExperience, setSelectedExperience] = useState<typeof mockExperiences[0] | null>(null)
+  const [selectedExperience, setSelectedExperience] = useState<Experience | null>(null)
   const [showBookingForm, setShowBookingForm] = useState(false)
 
-  const handleBookExperience = (experience: typeof mockExperiences[0]) => {
+  // Fetch experiences data
+  const { data: experiences = [], isLoading, error } = useQuery<Experience[]>({
+    queryKey: ['/api/experiences'],
+  })
+
+  // Fetch categories for the category section
+  const { data: categories = [] } = useQuery<string[]>({
+    queryKey: ['/api/categories'],
+  })
+
+  const handleBookExperience = (experience: Experience) => {
     setSelectedExperience(experience)
     setShowBookingForm(true)
     console.log('Booking experience:', experience.title)
@@ -114,23 +68,62 @@ export default function HomePage() {
           </p>
         </div>
         
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
-          {mockExperiences.map((experience) => (
-            <div key={experience.id} className="relative">
-              <ExperienceCard {...experience} />
-              <Button 
-                className="absolute bottom-4 right-4 z-10"
-                onClick={(e) => {
-                  e.stopPropagation()
-                  handleBookExperience(experience)
-                }}
-                data-testid={`button-quick-book-${experience.id}`}
-              >
-                Quick Book
-              </Button>
-            </div>
-          ))}
-        </div>
+        {/* Error state */}
+        {error && (
+          <div className="text-center py-8">
+            <p className="text-destructive mb-4">Failed to load experiences. Please try again later.</p>
+            <Button onClick={() => window.location.reload()}>Refresh Page</Button>
+          </div>
+        )}
+
+        {/* Loading state */}
+        {isLoading && (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
+            {Array.from({ length: 6 }).map((_, i) => (
+              <ExperienceCardSkeleton key={i} />
+            ))}
+          </div>
+        )}
+
+        {/* Experiences grid */}
+        {!isLoading && !error && (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
+            {experiences.map((experience) => (
+              <div key={experience.id} className="relative">
+                <ExperienceCard 
+                  id={experience.id}
+                  title={experience.title}
+                  location={experience.location}
+                  price={parseFloat(experience.price)}
+                  originalPrice={experience.originalPrice ? parseFloat(experience.originalPrice) : undefined}
+                  rating={parseFloat(experience.rating)}
+                  reviewCount={experience.reviewCount}
+                  duration={experience.duration}
+                  groupSize={experience.groupSize}
+                  category={experience.category}
+                  image={experience.image}
+                  featured={experience.featured}
+                />
+                <Button 
+                  className="absolute bottom-4 right-4 z-10"
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    handleBookExperience(experience)
+                  }}
+                  data-testid={`button-quick-book-${experience.id}`}
+                >
+                  Quick Book
+                </Button>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {!isLoading && !error && experiences.length === 0 && (
+          <div className="text-center py-8">
+            <p className="text-muted-foreground">No experiences available at the moment.</p>
+          </div>
+        )}
 
         <div className="text-center">
           <Button 
@@ -158,14 +151,14 @@ export default function HomePage() {
           
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {[
-              { name: 'Adventure', icon: '🏔️', count: 45 },
-              { name: 'Cultural', icon: '🏛️', count: 67 },
-              { name: 'Beach', icon: '🏖️', count: 32 },
-              { name: 'Food', icon: '🍛', count: 28 },
-              { name: 'Wildlife', icon: '🦁', count: 23 },
-              { name: 'Spiritual', icon: '🙏', count: 41 },
-              { name: 'City Tours', icon: '🏙️', count: 52 },
-              { name: 'Festivals', icon: '🎭', count: 19 }
+              { name: 'Adventure', icon: '🏔️', count: experiences.filter(e => e.category === 'Adventure').length },
+              { name: 'Cultural', icon: '🏛️', count: experiences.filter(e => e.category === 'Cultural').length },
+              { name: 'Beach', icon: '🏖️', count: experiences.filter(e => e.category === 'Beach').length },
+              { name: 'Food', icon: '🍛', count: experiences.filter(e => e.category === 'Food').length },
+              { name: 'Wildlife', icon: '🦁', count: experiences.filter(e => e.category === 'Wildlife').length },
+              { name: 'Spiritual', icon: '🙏', count: experiences.filter(e => e.category === 'Spiritual').length },
+              { name: 'City Tours', icon: '🏙️', count: experiences.filter(e => e.category === 'City Tours').length },
+              { name: 'Festivals', icon: '🎭', count: experiences.filter(e => e.category === 'Festivals').length }
             ].map((category) => (
               <Button
                 key={category.name}
@@ -176,7 +169,9 @@ export default function HomePage() {
               >
                 <div className="text-2xl mb-1">{category.icon}</div>
                 <div className="font-medium">{category.name}</div>
-                <div className="text-xs text-muted-foreground">{category.count} experiences</div>
+                <div className="text-xs text-muted-foreground">
+                  {category.count} experience{category.count !== 1 ? 's' : ''}
+                </div>
               </Button>
             ))}
           </div>
@@ -231,7 +226,8 @@ export default function HomePage() {
           {selectedExperience && (
             <BookingForm 
               experienceTitle={selectedExperience.title}
-              price={selectedExperience.price}
+              price={parseFloat(selectedExperience.price)}
+              experienceId={selectedExperience.id}
             />
           )}
         </DialogContent>
