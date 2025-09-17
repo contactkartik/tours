@@ -30,7 +30,22 @@ export default function HeroSection() {
   const handleSearch = () => {
     const searchData = { destination, category, guests, date }
     console.log('Search submitted:', searchData)
-    // TODO: Remove mock functionality - implement real search
+    
+    // Build search URL with query parameters
+    const searchParams = new URLSearchParams()
+    if (destination) searchParams.append('search', destination)
+    if (category) searchParams.append('category', category)
+    
+    // For a full implementation, you would navigate to a search results page
+    // For now, we'll just log the search and trigger an event
+    const searchUrl = `/search?${searchParams.toString()}`
+    console.log('Would navigate to:', searchUrl)
+    
+    // In a real app, you would use router to navigate:
+    // useLocation hook from wouter and navigate to search results page
+    window.dispatchEvent(new CustomEvent('heroSearch', { 
+      detail: searchData 
+    }))
   }
 
   return (
