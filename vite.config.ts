@@ -33,5 +33,6 @@ export default defineConfig({
       strict: true,
       deny: ["**/.*"],
     },
+  // reverted to previous config, removed historyApiFallback
   },
 });

@@ -11,11 +11,12 @@ export default function Header() {
   const [searchQuery, setSearchQuery] = useState('')
 
   const navigationItems = [
-    { label: 'Home', href: '/' },
-    { label: 'Experiences', href: '/experiences' },
-    { label: 'Adventures', href: '/adventures' },
-    { label: 'Cultural Tours', href: '/cultural' },
-    { label: 'About', href: '/about' }
+  { label: 'Home', href: '/' },
+  { label: 'Experiences', href: '/experiences' },
+  { label: 'Flights', href: '/flights' },
+  { label: 'Hotels', href: '/hotels' },
+  { label: 'Adventures', href: '/adventures' },
+  { label: 'About', href: '/about' }
   ]
 
   const handleSearch = () => {
@@ -50,6 +51,13 @@ export default function Header() {
                 {item.label}
               </Link>
             ))}
+             <Link
+               href="/login"
+               className={`px-3 py-2 rounded-md text-sm font-medium transition-colors hover-elevate text-primary bg-primary/10 ml-2`}
+               data-testid="link-nav-login"
+             >
+               Login
+             </Link>
           </nav>
 
           {/* Search Bar */}
