@@ -16,12 +16,12 @@ function Router() {
   return (
     <Switch>
       <Route path="/" component={HomePage} />
-  <Route path="/experiences" component={ExperiencesPage} />
-  <Route path="/flights" component={FlightsPage} />
-  <Route path="/hotels" component={HotelsPage} />
-  <Route path="/login" component={LoginPage} />
-  <Route path="/thankyou" component={ThankYouPage} />
-  <Route path="/logout" component={LogoutPage} />
+      <Route path="/experiences" component={ExperiencesPage} />
+      <Route path="/flights" component={FlightsPage} />
+      <Route path="/hotels" component={HotelsPage} />
+      <Route path="/login" component={LoginPage} />
+      <Route path="/thankyou" component={ThankYouPage} />
+      <Route path="/logout" component={LogoutPage} />
       <Route path="/adventures" component={() => <div className="p-8 text-center">Adventures page coming soon!</div>} />
       <Route path="/cultural" component={() => <div className="p-8 text-center">Cultural tours page coming soon!</div>} />
       <Route path="/about" component={() => <div className="p-8 text-center">About page coming soon!</div>} />

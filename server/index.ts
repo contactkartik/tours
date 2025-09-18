@@ -66,6 +66,8 @@ app.use((req, res, next) => {
     host: "0.0.0.0",
     
   }, () => {
-    log(`serving on port ${port}`);
+    log(`🚀 BookKaroIndia server running on http://localhost:${port}`);
+    log(`📱 Frontend: http://localhost:${port}`);
+    log(`🔌 API: http://localhost:${port}/api`);
   });
 })();
